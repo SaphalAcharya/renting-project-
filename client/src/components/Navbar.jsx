@@ -1,25 +1,48 @@
 import React, { useState } from "react";
 import { assets, menuLinks } from "../assets/assets";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
+import {motion} from "motion/react";
 
-const Navbar = ({ setShowLogin }) => {
+const Navbar = () => {
+  const {setShowLogin, user, logout, isOwner, axios, setIsOwner}= useAppContext()
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   const isHome = location.pathname === "/";
   const closeMenu = () => setOpen(false);
+  const changeRole= async ()=>{
+    try {
+     const {data}= await axios.post('/api/owner/change-role')
+     if(data.success){
+      setIsOwner(true)
+      toast.success(data.message)
+     }else{
+      toast.error(data.message)
+     }
+
+    } catch (error) {
+        toast.error(error.message)
+    }    
+
+  }
 
   return (
     <>
-      <nav
+      <motion.nav
+      initial={{y:-20, opacity:0}}
+      animate={{y:0, opacity:1}}
+      transition={{duration:0.5}}
         className={`flex items-center justify-between px-6 h-[60px] border-b border-borderColor relative z-50 transition-colors ${
           isHome ? "bg-light" : "bg-gray-50"
         }`}
       >
         {/* Logo */}
         <Link to="/" onClick={closeMenu}>
-          <img
+          <motion.img
+          whileHover={{scale:1.5}}
             src={assets.logo}
             alt="logo"
             className="h-8 md:h-10 w-auto object-contain"
@@ -60,16 +83,16 @@ const Navbar = ({ setShowLogin }) => {
 
           {/* Actions */}
           <button
-            onClick={() => navigate("/owner")}
+            onClick={() => isOwner ? navigate("/owner"): changeRole() }
             className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
           >
-            Dashboard
+            {isOwner ? 'Dashboard' : 'list cars'}
           </button>
           <button
-            onClick={() => setShowLogin(true)}
+            onClick={() => {user ? logout() :setShowLogin(true)}}
             className="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:scale-95 px-5 py-1.5 rounded-lg transition-all cursor-pointer shadow-sm"
           >
-            Login
+           {user?'logout': 'Login'}
           </button>
         </div>
 
@@ -89,10 +112,10 @@ const Navbar = ({ setShowLogin }) => {
             className={`block w-[22px] h-[2px] bg-gray-600 rounded-full transition-all duration-250 origin-center ${open ? "-translate-y-[7px] -rotate-45" : ""}`}
           />
         </button>
-      </nav>
+      </motion.nav>
 
       {/* Mobile Drawer */}
-      <div
+      <motion.div
         className={`sm:hidden fixed top-[60px] right-0 w-[280px] h-[calc(100vh-60px)] z-50
                     bg-white border-l border-borderColor shadow-xl
                     flex flex-col p-4
@@ -145,7 +168,7 @@ const Navbar = ({ setShowLogin }) => {
         >
           Login
         </button>
-      </div>
+      </motion.div>
 
       {/* Backdrop */}
       {open && (

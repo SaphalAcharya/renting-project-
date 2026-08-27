@@ -1,19 +1,33 @@
 import React, { useState } from "react";
-import { assets, dummyUserData, ownerMenuLinks } from "../../assets/assets";
+import { assets, ownerMenuLinks } from "../../assets/assets";
 import { NavLink, useLocation } from "react-router-dom";
+import { useAppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 const Sidebar = () => {
-  const user = dummyUserData;
+  const { user, axios, fetchUser } = useAppContext();
   const location = useLocation();
   const [image, setImage] = useState(null);
 
-  const updateImage = () => {
-    if (!image) return;
+  const updateImage = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("image", image); 
+      const { data } = await axios.post("/api/owner/update-image", formData) 
 
-    user.image = URL.createObjectURL(image);
-    setImage(null);
+      if (data.success) {
+        fetchUser();
+        toast.success(data.message);
+        setImage('');
+      }
+      else{
+        toast.error(data.message);
+      }
+    }catch (error) {
+      toast.error(error.message);
+    }
   };
-
+  
   return (
     <div className="relative flex flex-col items-center w-20 md:w-64 min-h-screen bg-white border-r border-gray-200 py-8 shadow-sm">
       {/* Profile Image */}
@@ -47,7 +61,7 @@ const Sidebar = () => {
       {image && (
         <button
           onClick={updateImage}
-          className="mt-4 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
+          className="absolute top-0 right-0 flex p-2 gap-1 bg-primary/10 text-primary cursor-pointer"
         >
           Save
           <img
@@ -60,7 +74,7 @@ const Sidebar = () => {
 
       {/* User Name */}
       <h2 className="mt-4 text-base font-semibold text-gray-700 hidden md:block">
-        {user.name}
+        {user?.name || "Owner"}
       </h2>
 
       {/* Sidebar Menu */}

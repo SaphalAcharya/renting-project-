@@ -1,31 +1,41 @@
 import React, { useState } from "react";
 import { assets, cityList } from "../assets/assets";
+import { useAppContext } from "../context/AppContext";
+import { motion } from "motion/react";
 
 const Hero = () => {
-  const [pickUpLocation, setPickUpLocation] = useState("");
-  const [pickupDate, setPickupDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
+  const [pickupLocation, setPickupLocation] = useState("");
+  const { pickupDate, setpickupDate, returnDate, setReturnDate, navigate } = useAppContext();
 
-  const handleSubmit = (e) => {
+
+  const handleSearch = (e) => {
     e.preventDefault();
-
-    console.log({
-      pickUpLocation,
-      pickupDate,
-      returnDate,
-    });
+    navigate(`/cars?pickupLocation=${pickupLocation}&pickupDate=${pickupDate}&returnDate=${returnDate}`);
   };
 
   return (
-    <section className="flex flex-col items-center px-4 pt-20 pb-10 bg-[#f6f8fb]">
+    <motion.section
+      initial={{ y: 50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5}}
+      className="flex flex-col items-center px-4 pt-20 pb-10 bg-[#f6f8fb]"
+  >
       {/* Heading */}
-      <h1 className="text-4xl md:text-6xl font-bold text-center text-gray-900">
+      <motion.h1 
+      initial={{y:50, opacity:0}}
+      animate={{y:0, opacity:1}}
+      transition={{duration:0.8, delay:0.2}}
+      className="text-4xl md:text-6xl font-bold text-center text-gray-900">
         Luxury Cars on Rent
-      </h1>
+      </motion.h1>
 
       {/* Search Form */}
-      <form
-        onSubmit={handleSubmit}
+      <motion.form
+      initial={{scale:0.8, y:50, opacity:0}}
+      animate={{scale:1,y:0, opacity:1}}
+      transition={{duration:0.6, delay:0.4}}
+
+        onSubmit={handleSearch}
         className="
           mt-12
           bg-white
@@ -47,8 +57,8 @@ const Hero = () => {
             </label>
 
             <select
-              value={pickUpLocation}
-              onChange={(e) => setPickUpLocation(e.target.value)}
+              value={pickupLocation}
+              onChange={(e) => setPickupLocation(e.target.value)}
               className="
                 mt-2
                 w-full
@@ -78,7 +88,7 @@ const Hero = () => {
             <input
               type="date"
               value={pickupDate}
-              onChange={(e) => setPickupDate(e.target.value)}
+              onChange={(e) => setpickupDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
               className="
                 mt-2
@@ -145,7 +155,7 @@ const Hero = () => {
             Search
           </button>
         </div>
-      </form>
+      </motion.form>
 
       {/* Car Image */}
       <img
@@ -154,12 +164,12 @@ const Hero = () => {
         className="
           mt-12
           w-full
-          max-w-[900px]
+          max-w-225
           object-contain
           drop-shadow-2xl
         "
       />
-    </section>
+    </motion.section>
   );
 };
 

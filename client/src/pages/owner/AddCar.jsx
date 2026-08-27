@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import Title from "../../components/owner/Title";
+import { toast } from "react-hot-toast";
 import { assets } from "../../assets/assets.js";
+import { useAppContext } from "../../context/AppContext";
 
 const AddCar = () => {
-  const currency = import.meta.env.VITE_CURRENCY;
+  const { axios , currency } = useAppContext();
 
   const [image, setImage] = useState(null);
   const [car, setCar] = useState({
@@ -13,13 +15,53 @@ const AddCar = () => {
     pricePerDay: 0,
     category: "",
     transmission: "",
-    fuelType: "",
+    fuel_type: "",
     seating_capacity: 0,
     location: "",
     description: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
   const onsubmitHandler = async (e) => {
     e.preventDefault();
+    if(isLoading) return null;
+    if (!image) {
+      toast.error("Please upload a car image");
+      return;
+    }
+    setIsLoading(true);
+    try{
+      const formData = new FormData();
+      formData.append('carData', JSON.stringify(car));
+      formData.append('image', image);
+
+      const { data } = await axios.post('/api/owner/add-car', formData) 
+      if(data.success){
+        toast.success(data.message);
+        setImage(null);
+        setCar({
+    brand: "",
+    model: "",
+    year: 0,
+    pricePerDay: 0,
+    category: "",
+    transmission: "",
+    fuel_type: "",
+    seating_capacity: 0,
+    location: "",
+    description: "",     
+          
+    })
+  }else{
+    toast.error(data.message);
+    }
+}
+    catch (error) {
+    toast.error(error.message);
+    }
+    finally{
+      setIsLoading(false);
+    } 
+  
   };
 
   return (
@@ -139,8 +181,8 @@ const AddCar = () => {
             <select
               required
               className="px-3 py-2 mt-1 border border-borderColor rounded-md outline-none"
-              value={car.fuelType}
-              onChange={(e) => setCar({ ...car, fuelType: e.target.value })}
+              value={car.fuel_type}
+              onChange={(e) => setCar({ ...car, fuel_type: e.target.value })}
             >
               <option value="">Select fuel type</option>
               <option value="Petrol">Petrol</option>
@@ -156,9 +198,9 @@ const AddCar = () => {
               placeholder="Enter seating capacity: 2,4,5,7..."
               required
               className="px-3 py-2 mt-1 border border-borderColor rounded-md outline-none"
-              value={car.seatingCapacity}
+              value={car.seating_capacity}
               onChange={(e) =>
-                setCar({ ...car, seatingCapacity: e.target.value })
+                setCar({ ...car, seating_capacity: e.target.value })
               }
             />
           </div>
@@ -194,7 +236,7 @@ const AddCar = () => {
 
         <button className="flex flex-center gap-2 px-4 py-2.5 mt-4 bg-primary text-white rounded-md font-medium w-max cursor-pointer">
           <img src={assets.tick_icon} alt="" />
-          List Your Car
+          {isLoading ? "Loading..." : "List Your Car"}
         </button>
       </form>
     </div>
